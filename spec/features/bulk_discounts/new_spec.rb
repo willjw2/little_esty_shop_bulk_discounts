@@ -68,8 +68,9 @@ RSpec.describe 'merchant bulk discounts new page' do
     click_button "Submit"
     # save_and_open_page
     expect(page).to have_content("Bulk Discount not created: Required information missing.")
+    # save_and_open_page
     visit merchant_bulk_discounts_path(@merchant1)
-    save_and_open_page
+    # save_and_open_page
     expect(page).to_not have_content("Quantity threshold: 8")
   end
 end

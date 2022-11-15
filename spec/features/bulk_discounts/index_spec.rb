@@ -83,4 +83,24 @@ RSpec.describe 'merchant bulk discounts index' do
     click_link("Create a New Discount")
     expect(current_path).to eq(new_merchant_bulk_discount_path(@merchant1))
   end
+  it "contains a link to delete a bulk discount" do
+    visit merchant_bulk_discounts_path(@merchant1)
+
+    within "#discount#{@bulk_discount1.id}" do
+      expect(page).to have_button("Delete Discount ##{@bulk_discount1.id}")
+      click_button("Delete Discount ##{@bulk_discount1.id}")
+    end
+
+    expect(current_path).to eq(merchant_bulk_discounts_path(@merchant1))
+    expect(page).to_not have_link("Discount ##{@bulk_discount1.id}")
+    expect(page).to_not have_content("Quantity threshold: #{@bulk_discount1.quantity}")
+    expect(page).to_not have_content("#{@bulk_discount1.percentage * 100}% discount")
+
+    within "#discount#{@bulk_discount2.id}" do
+      expect(page).to have_content("Discount ##{@bulk_discount2.id}")
+      expect(page).to have_content("Quantity threshold: #{@bulk_discount2.quantity}")
+      expect(page).to have_content("#{@bulk_discount2.percentage * 100}% discount")
+      expect(page).to have_button("Delete Discount ##{@bulk_discount2.id}")
+    end
+  end
 end
