@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'merchant bulk discounts show' do
+RSpec.describe 'merchant bulk discounts index' do
   before :each do
     @merchant1 = Merchant.create!(name: 'Hair Care')
 
@@ -44,20 +44,41 @@ RSpec.describe 'merchant bulk discounts show' do
     @bulk_discount2 = BulkDiscount.create!(merchant_id: @merchant1.id, percentage: 0.30, quantity: 5)
   end
 
-  it "lists the bulk discount's quantity threshold and percentage discount" do
+  it "contains a form to edit the bulk discount that is prefilled with existing attributes" do
+    visit edit_merchant_bulk_discount_path(@merchant1, @bulk_discount1)
+    # save_and_open_page
+    expect(page).to have_field(:quantity, with: 2)
+    expect(page).to have_field(:percentage, with: 0.10)
+    expect(page).to have_button("Submit")
+  end
+  it "can update the bulk discount and redirect to bulk discount show page when form is submitted" do
+    visit edit_merchant_bulk_discount_path(@merchant1, @bulk_discount1)
+    fill_in 'Quantity Threshold:', with: 3
+    fill_in 'Percentage:', with: 0.15
+    click_button 'Submit'
+    expect(current_path).to eq(merchant_bulk_discount_path(@merchant1, @bulk_discount1))
+    # save_and_open_page
+    expect(page).to have_content("Bulk Discount updated successfully!")
+    expect(page).to have_content("Discount ##{@bulk_discount1.id}")
+    expect(page).to have_content("Quantity threshold: 3")
+    expect(page).to have_content("15.0% discount")
+
+
+    expect(page).to_not have_content("Quantity threshold: #{@bulk_discount1.quantity}")
+    expect(page).to_not have_content("#{@bulk_discount1.percentage * 100}% discount")
+  end
+  it "goes back to the edit page with a flash message when the item is not successfully updated" do
+    visit edit_merchant_bulk_discount_path(@merchant1, @bulk_discount1)
+    fill_in 'Quantity Threshold:', with: 3
+    fill_in 'Percentage:', with: nil
+    click_button 'Submit'
+    # save_and_open_page
+    expect(current_path).to eq(edit_merchant_bulk_discount_path(@merchant1, @bulk_discount1))
+    expect(page).to have_content("Bulk Discount not updated: Required information missing.")
+
     visit merchant_bulk_discount_path(@merchant1, @bulk_discount1)
     # save_and_open_page
-    expect(page).to have_content("Discount ##{@bulk_discount1.id}")
     expect(page).to have_content("Quantity threshold: #{@bulk_discount1.quantity}")
     expect(page).to have_content("#{@bulk_discount1.percentage * 100}% discount")
-  end
-
-  it "contains a link to edit the bulk discount" do
-    visit merchant_bulk_discount_path(@merchant1, @bulk_discount1)
-
-    expect(page).to have_link("Edit Bulk Discount")
-    click_link("Edit Bulk Discount")
-
-    expect(current_path).to eq(edit_merchant_bulk_discount_path(@merchant1, @bulk_discount1))
   end
 end
