@@ -14,13 +14,19 @@ class BulkDiscountsController < ApplicationController
     bulk_discount = BulkDiscount.new(bulk_discount_params)
     # require "pry"; binding.pry
     if bulk_discount.save
+      flash[:notice] = nil
       redirect_to "/merchant/#{@merchant.id}/bulk_discounts"
     else
       flash[:notice] = "Bulk Discount not created: Required information missing."
       render :new
     end
   end
-
+  def destroy
+    merchant = Merchant.find(params[:merchant_id])
+    bulk_discount = BulkDiscount.find(params[:id])
+    bulk_discount.destroy
+    redirect_to merchant_bulk_discounts_path(merchant)
+  end
 
   private
 
