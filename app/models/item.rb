@@ -7,10 +7,13 @@ class Item < ApplicationRecord
   has_many :invoice_items
   has_many :invoices, through: :invoice_items
   belongs_to :merchant
+  #create model test later
+  has_many :bulk_discounts, through: :merchant
 
   enum status: [:disabled, :enabled]
 
   def best_day
+    # require "pry"; binding.pry
     invoices
     .joins(:invoice_items)
     .where('invoices.status = 2')
