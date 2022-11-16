@@ -7,7 +7,7 @@ class Invoice < ApplicationRecord
   has_many :invoice_items
   has_many :items, through: :invoice_items
   has_many :merchants, through: :items
-  #add model test for this relationship later
+
   # has_many :bulk_discounts, through: :merchants
 
   enum status: [:cancelled, :'in progress', :completed]
@@ -29,6 +29,16 @@ class Invoice < ApplicationRecord
     invoice_items
     .joins(:bulk_discounts)
     .where('items.merchant_id = ?', merchant_id)
+    .where('invoice_items.quantity >= bulk_discounts.quantity')
+    .group('invoice_items.item_id')
+    .maximum('invoice_items.quantity * invoice_items.unit_price * bulk_discounts.percentage')
+    .pluck(1)
+    .sum
+  end
+
+  def admin_bulk_discount_amount
+    invoice_items
+    .joins(:bulk_discounts)
     .where('invoice_items.quantity >= bulk_discounts.quantity')
     .group('invoice_items.item_id')
     .maximum('invoice_items.quantity * invoice_items.unit_price * bulk_discounts.percentage')
