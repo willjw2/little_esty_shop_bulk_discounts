@@ -51,6 +51,9 @@ RSpec.describe 'invoices show' do
     @transaction6 = Transaction.create!(credit_card_number: 879799, result: 0, invoice_id: @invoice_6.id)
     @transaction7 = Transaction.create!(credit_card_number: 203942, result: 1, invoice_id: @invoice_7.id)
     @transaction8 = Transaction.create!(credit_card_number: 203942, result: 1, invoice_id: @invoice_8.id)
+
+    @bulk_discount1 = BulkDiscount.create!(merchant_id: @merchant1.id, percentage: 0.10, quantity: 5)
+    @bulk_discount2 = BulkDiscount.create!(merchant_id: @merchant1.id, percentage: 0.20, quantity: 10)
   end
 
   it "shows the invoice information" do
@@ -76,7 +79,6 @@ RSpec.describe 'invoices show' do
     expect(page).to have_content(@ii_1.quantity)
     expect(page).to have_content(@ii_1.unit_price)
     expect(page).to_not have_content(@ii_4.unit_price)
-
   end
 
   it "shows the total revenue for this invoice" do
@@ -100,4 +102,27 @@ RSpec.describe 'invoices show' do
      end
   end
 
+  it "shows the total revenue for this invoice with bulk discounts applied" do
+    visit merchant_invoice_path(@merchant1, @invoice_1)
+    # require "pry"; binding.pry
+    # save_and_open_page
+    expect(page).to have_content(@invoice_1.total_revenue - @invoice_1.bulk_discount_amount(@merchant1.id))
+  end
+
+  it "next to each invoice item it shows a link to the show page for the bulk discount applied" do
+    visit merchant_invoice_path(@merchant1, @invoice_1)
+    expect(page).to have_link("Discount ##{@bulk_discount1.id}", count: 1)
+    expect(page).to have_link("Discount ##{@bulk_discount2.id}", count: 1)
+    click_link "Discount ##{@bulk_discount2.id}"
+    # save_and_open_page
+    expect(current_path).to eq(merchant_bulk_discount_path(@merchant1, @bulk_discount2))
+    visit merchant_invoice_path(@merchant2, @invoice_8)
+    # save_and_open_page
+  end
+  it "doesn't show a discount applied next to an invoice item if it doesn't qualify" do
+    visit merchant_invoice_path(@merchant1, @invoice_5)
+    # save_and_open_page
+    expect(page).to_not have_link("Discount ##{@bulk_discount1.id}")
+    expect(page).to_not have_link("Discount ##{@bulk_discount2.id}")
+  end
 end
