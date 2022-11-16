@@ -85,7 +85,7 @@ RSpec.describe 'merchant bulk discounts index' do
   end
   it "contains a link to delete a bulk discount" do
     visit merchant_bulk_discounts_path(@merchant1)
-
+    # save_and_open_page
     within "#discount#{@bulk_discount1.id}" do
       expect(page).to have_button("Delete Discount ##{@bulk_discount1.id}")
       click_button("Delete Discount ##{@bulk_discount1.id}")
@@ -101,6 +101,13 @@ RSpec.describe 'merchant bulk discounts index' do
       expect(page).to have_content("Quantity threshold: #{@bulk_discount2.quantity}")
       expect(page).to have_content("#{@bulk_discount2.percentage * 100}% discount")
       expect(page).to have_button("Delete Discount ##{@bulk_discount2.id}")
+    end
+  end
+  it "contains a section Upcoming Holidays with the name and date of the next 3 upcoming US holidays" do
+    visit merchant_bulk_discounts_path(@merchant1)
+    within "#holidays" do
+      expect(page).to have_content("Upcoming Holidays")
+      #Is it possible to test the api response given that it changed based on date?
     end
   end
 end

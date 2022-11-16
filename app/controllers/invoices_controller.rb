@@ -12,7 +12,7 @@ class InvoicesController < ApplicationController
     # @invoice_item = InvoiceItem.where(invoice_id: params[:id]).first
     @bulk_discount_amount = @invoice.bulk_discount_amount(@merchant.id)
     @discounted_revenue = @invoice.total_revenue - @bulk_discount_amount
-    # try and refactor later
+
     # @bulk_discounts.sum {|ii| ii.max_discount}
   end
 
